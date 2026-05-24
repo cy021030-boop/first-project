@@ -5,88 +5,211 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>啵啵王地牢</title>
 <style>
-body{
-  margin:0;
-  background:#09070d;
-  color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+body{margin:0;background:#0b0710;color:white;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+.app{max-width:430px;margin:auto;padding:12px}
+h1{margin:0 0 10px;color:#ffd66b}
+.top{display:flex;justify-content:space-between;align-items:center}
+button{border:0;border-radius:14px;background:#2c1d3b;color:white;padding:12px;font-size:18px}
+.info{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.info div{background:#17101f;border-radius:10px;text-align:center;padding:8px 2px;font-size:12px}
+.info b{display:block;color:#ffd66b}
+#map{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:#050409;border:2px solid #47305c;border-radius:16px;padding:6px}
+.cell{aspect-ratio:1/1;border-radius:6px;background:#120d18;display:flex;align-items:center;justify-content:center;font-size:22px}
+.wall{background:#251733}
+.player{background:#6b3cff}
+.enemy{background:#4b1930}
+.item{background:#202014}
+.stair{background:#33284a}
+.ctrl{display:grid;grid-template-columns:repeat(3,80px);gap:8px;justify-content:center;margin:12px 0}
+.ctrl button{height:56px;font-weight:bold}
+.skill{background:#ffd66b;color:#1a0710}
+.box{background:#17101f;border-radius:12px;padding:10px;margin-top:8px;color:#d8c8e8;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <h1>啵啵王地牢</h1>
+    <button onclick="newGame()">新局</button>
+  </div>
+
+  <div class="info">
+    <div>HP<b id="hp"></b></div>
+    <div>神压<b id="power"></b></div>
+    <div>层数<b id="floor"></b></div>
+    <div>击杀<b id="kill"></b></div>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="ctrl">
+    <span></span><button onclick="move(0,-1)">▲</button><span></span>
+    <button onclick="move(-1,0)">◀</button><button class="skill" onclick="skill()">神压</button><button onclick="move(1,0)">▶</button>
+    <span></span><button onclick="move(0,1)">▼</button><span></span>
+  </div>
+
+  <div id="msg" class="box"></div>
+  <div class="box">👑你 🐀怪物 🧪药水 ✨楼梯</div>
+</div>
+
+<script>
+const N=8;
+let G;
+
+function rnd(n){return Math.floor(Math.random()*n)}
+function at(arr,x,y){return arr.find(o=>o.x===x&&o.y===y)}
+function pass(x,y){return x>=0&&y>=0&&x<N&&y<N&&G.map[y][x]!==1}
+
+function newGame(){
+  G={hp:30,max:30,power:0,floor:1,kill:0,p:{x:1,y:1},stairs:{x:6,y:6},mon:[],items:[],map:[],over:false};
+  makeMap();
+  say("啵啵王进入地牢。移动撞怪，神压满25点可放技能。");
+  draw();
 }
-.app{
-  max-width:430px;
-  margin:auto;
-  padding:12px;
+
+function makeMap(){
+  G.map=[];
+  for(let y=0;y<N;y++){
+    G.map[y]=[];
+    for(let x=0;x<N;x++){
+      G.map[y][x]=(x===0||y===0||x===N-1||y===N-1||Math.random()<0.12)?1:0;
+    }
+  }
+  G.map[1][1]=0;
+  G.map[6][6]=0;
+  G.p={x:1,y:1};
+  G.stairs={x:6,y:6};
+  G.mon=[];
+  G.items=[];
+  for(let i=0;i<3+G.floor;i++)placeMonster();
+  for(let i=0;i<3;i++)placeItem();
 }
-.top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+
+function empty(x,y){
+  return pass(x,y)&&!(G.p.x===x&&G.p.y===y)&&!(G.stairs.x===x&&G.stairs.y===y)&&!at(G.mon,x,y)&&!at(G.items,x,y);
 }
-h1{
-  margin:0;
-  color:#ffd66b;
-  font-size:26px;
+
+function placeMonster(){
+  for(let i=0;i<99;i++){
+    let x=rnd(N),y=rnd(N);
+    if(empty(x,y)){G.mon.push({x,y,hp:6+G.floor,atk:3});return}
+  }
 }
-button{
-  border:0;
-  color:#fff;
-  font:inherit;
+
+function placeItem(){
+  for(let i=0;i<99;i++){
+    let x=rnd(N),y=rnd(N);
+    if(empty(x,y)){G.items.push({x,y});return}
+  }
 }
-.btn{
-  background:#2a1c38;
-  border-radius:12px;
-  padding:10px 14px;
+
+function draw(){
+  hp.textContent=G.hp+"/"+G.max;
+  power.textContent=G.power;
+  floor.textContent=G.floor;
+  kill.textContent=G.kill;
+  map.innerHTML="";
+  for(let y=0;y<N;y++){
+    for(let x=0;x<N;x++){
+      let d=document.createElement("div");
+      d.className="cell";
+      if(G.map[y][x]===1)d.className+=" wall";
+      if(G.stairs.x===x&&G.stairs.y===y){d.className+=" stair";d.textContent="✨"}
+      if(at(G.items,x,y)){d.className+=" item";d.textContent="🧪"}
+      if(at(G.mon,x,y)){d.className+=" enemy";d.textContent="🐀"}
+      if(G.p.x===x&&G.p.y===y){d.className+=" player";d.textContent="👑"}
+      map.appendChild(d);
+    }
+  }
 }
-.stats{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:6px;
-  margin:10px 0;
+
+function say(t){msg.textContent=t}
+
+function hit(m){
+  m.hp-=6;
+  G.power=Math.min(100,G.power+5);
+  if(m.hp<=0){
+    G.mon=G.mon.filter(e=>e!==m);
+    G.kill++;
+    G.power=Math.min(100,G.power+8);
+    say("镇压怪物，神压上涨。");
+  }else{
+    say("攻击怪物。");
+  }
 }
-.s{
-  background:#17101f;
-  border-radius:10px;
-  text-align:center;
-  padding:7px 2px;
-  font-size:12px;
-  color:#cdbce0;
+
+function hurt(n){
+  G.hp-=n;
+  G.power=Math.min(100,G.power+n);
+  if(G.hp<=0){
+    if(G.power>=70){
+      G.hp=1;
+      G.power=25;
+      say("神躯未醒：啵啵王拒绝死亡。");
+    }else{
+      G.hp=0;
+      G.over=true;
+      say("倒下了，点新局重来。");
+    }
+  }
 }
-.s b{
-  display:block;
-  color:#fff;
+
+function enemyTurn(){
+  for(const m of G.mon){
+    if(Math.abs(m.x-G.p.x)+Math.abs(m.y-G.p.y)===1){hurt(m.atk);continue}
+    let dx=Math.sign(G.p.x-m.x),dy=Math.sign(G.p.y-m.y);
+    let nx=m.x+dx,ny=m.y;
+    if(pass(nx,ny)&&!at(G.mon,nx,ny)&&!(G.p.x===nx&&G.p.y===ny)){m.x=nx;m.y=ny}
+    else{
+      nx=m.x;ny=m.y+dy;
+      if(pass(nx,ny)&&!at(G.mon,nx,ny)&&!(G.p.x===nx&&G.p.y===ny)){m.x=nx;m.y=ny}
+    }
+  }
 }
-.board{
-  display:grid;
-  grid-template-columns:repeat(10,1fr);
-  gap:2px;
-  background:#050409;
-  border:2px solid #39244c;
-  border-radius:16px;
-  padding:5px;
+
+function move(dx,dy){
+  if(G.over)return;
+  let x=G.p.x+dx,y=G.p.y+dy;
+  if(!pass(x,y)){say("撞墙了。");return}
+  let m=at(G.mon,x,y);
+  if(m)hit(m);
+  else{
+    G.p={x,y};
+    let it=at(G.items,x,y);
+    if(it){
+      G.hp=Math.min(G.max,G.hp+8);
+      G.items=G.items.filter(v=>v!==it);
+      say("喝下药水，血肉合拢。");
+    }
+    if(x===G.stairs.x&&y===G.stairs.y){
+      G.floor++;
+      G.hp=Math.min(G.max,G.hp+5);
+      G.power=Math.min(100,G.power+10);
+      makeMap();
+      say("进入第"+G.floor+"层。");
+    }
+  }
+  enemyTurn();
+  draw();
 }
-.c{
-  aspect-ratio:1/1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:5px;
-  font-size:20px;
+
+function skill(){
+  if(G.over)return;
+  if(G.power<25){say("神压不足，需要25。");return}
+  G.power-=25;
+  let c=0;
+  for(const m of [...G.mon]){
+    if(Math.abs(m.x-G.p.x)+Math.abs(m.y-G.p.y)<=2){
+      m.hp-=10;c++;
+      if(m.hp<=0){G.mon=G.mon.filter(e=>e!==m);G.kill++}
+    }
+  }
+  say(c?"神压爆开，压制"+c+"个怪物。":"周围没有怪物。");
+  enemyTurn();
+  draw();
 }
-.w{background:#21162b}
-.f{background:#100b15}
-.p{background:#6b3cff}
-.e{background:#451b2e}
-.i{background:#181120}
-.st{background:#2d2140}
-.ctrl{
-  display:grid;
-  grid-template-columns:repeat(3,80px);
-  gap:8px;
-  justify-content:center;
-  margin:12px 0;
-}
-.ctrl button{
-  height:55px;
-  border-radius:16px;
-  background:#2a1c38;
-  font-size:22px;
-  font-weight:bold
+
+newGame();
+</script>
+</body>
+</html>
