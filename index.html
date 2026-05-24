@@ -1,64 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小费计算器</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="container">
-    <section class="card">
-      <div class="badge">Tip Calculator</div>
-
-      <h1>小费计算器</h1>
-      <p class="subtitle">快速计算小费、总金额，还能按人数平摊</p>
-
-      <label for="bill">账单金额</label>
-      <div class="input-wrap">
-        <span>$</span>
-        <input type="number" id="bill" placeholder="例如：50" min="0" step="0.01">
-      </div>
-
-      <label for="tip">小费比例</label>
-      <div class="tip-buttons">
-        <button type="button" class="tip-btn" data-tip="10">10%</button>
-        <button type="button" class="tip-btn active" data-tip="15">15%</button>
-        <button type="button" class="tip-btn" data-tip="20">20%</button>
-      </div>
-
-      <div class="input-wrap">
-        <span>%</span>
-        <input type="number" id="tip" value="15" placeholder="例如：15" min="0" step="1">
-      </div>
-
-      <label for="people">平摊人数</label>
-      <div class="input-wrap">
-        <span>人</span>
-        <input type="number" id="people" value="1" min="1" step="1">
-      </div>
-
-      <div class="result">
-        <div>
-          <span>小费金额</span>
-          <strong id="tipAmount">$0.00</strong>
-        </div>
-        <div>
-          <span>总金额</span>
-          <strong id="totalAmount">$0.00</strong>
-        </div>
-        <div>
-          <span>每人支付</span>
-          <strong id="perPersonAmount">$0.00</strong>
-        </div>
-      </div>
-
-      <button id="clearBtn" class="clear-btn">清空</button>
-
-      <footer>Made by cy021030-boop</footer>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
-</body>
-</html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>啵啵王地牢</title>
+<style>
+body{
+  margin:0;
+  background:#09070d;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+}
+.app{
+  max-width:430px;
+  margin:auto;
+  padding:12px;
+}
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+h1{
+  margin:0;
+  color:#ffd66b;
+  font-size:26px;
+}
+button{
+  border:0;
+  color:#fff;
+  font:inherit;
+}
+.btn{
+  background:#2a1c38;
+  border-radius:12px;
+  padding:10px 14px;
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  margin:10px 0;
+}
+.s{
+  background:#17101f;
+  border-radius:10px;
+  text-align:center;
+  padding:7px 2px;
+  font-size:12px;
+  color:#cdbce0;
+}
+.s b{
+  display:block;
+  color:#fff;
+}
+.board{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:2px;
+  background:#050409;
+  border:2px solid #39244c;
+  border-radius:16px;
+  padding:5px;
+}
+.c{
+  aspect-ratio:1/1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:5px;
+  font-size:20px;
+}
+.w{background:#21162b}
+.f{background:#100b15}
+.p{background:#6b3cff}
+.e{background:#451b2e}
+.i{background:#181120}
+.st{background:#2d2140}
+.ctrl{
+  display:grid;
+  grid-template-columns:repeat(3,80px);
+  gap:8px;
+  justify-content:center;
+  margin:12px 0;
+}
+.ctrl button{
+  height:55px;
+  border-radius:16px;
+  background:#2a1c38;
+  font-size:22px;
+  font-weight:bold
